@@ -14,7 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import absolute_import
 import csv, sys, urllib, re
+from six.moves import zip
 
 # Tees output to a logfile for debugging
 class Logger:
@@ -79,7 +81,7 @@ def output_results(results, mvdelim = '\n', output = sys.stdout):
             if(isinstance(result[key], list)):
                 result['__mv_' + key] = encode_mv(result[key])
                 result[key] = mvdelim.join(result[key])
-        fields.update(result.keys())
+        fields.update(list(result.keys()))
 
     # convert the fields into a list and create a CSV writer
     # to output to stdout
@@ -88,7 +90,7 @@ def output_results(results, mvdelim = '\n', output = sys.stdout):
     writer = csv.DictWriter(output, fields)
 
     # Write out the fields, and then the actual results
-    writer.writerow(dict(zip(fields, fields)))
+    writer.writerow(dict(list(zip(fields, fields))))
     writer.writerows(results)
 
 def read_input(buf, has_header = True):
