@@ -14,7 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import csv, StringIO, sys, urllib
+from __future__ import absolute_import
+import csv, io, sys, urllib
+from six.moves import zip
 
 # Tees output to a logfile for debugging
 class Logger:
@@ -79,7 +81,7 @@ def output_results(results, mvdelim = '\n', output = sys.stdout):
             if(isinstance(result[key], list)):
                 result['__mv_' + key] = encode_mv(result[key])
                 result[key] = mvdelim.join(result[key])
-        fields.update(result.keys())
+        fields.update(list(result.keys()))
 
     # convert the fields into a list and create a CSV writer
     # to output to stdout
@@ -88,7 +90,7 @@ def output_results(results, mvdelim = '\n', output = sys.stdout):
     writer = csv.DictWriter(output, fields)
 
     # Write out the fields, and then the actual results
-    writer.writerow(dict(zip(fields, fields)))
+    writer.writerow(dict(list(zip(fields, fields))))
     writer.writerows(results)
 
 def read_input(buf, has_header = True):
@@ -153,7 +155,7 @@ def main(argv):
 
     for event in events:
         # For each event, we read in the raw event data
-        raw = StringIO.StringIO(event["_raw"])
+        raw = io.StringIO(event["_raw"])
         top_output = csv.DictReader(raw, delimiter = ' ', skipinitialspace = True)
     
         # And then, for each row of the output of the 'top' command
@@ -165,7 +167,7 @@ def main(argv):
             user = user if not user.startswith('_') else user[1:]
     
             usercount = 0
-            if usercounts.has_key(user):
+            if user in usercounts:
                 usercount = usercounts[user]
     
             usercount += 1

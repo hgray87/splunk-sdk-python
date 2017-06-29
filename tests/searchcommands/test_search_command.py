@@ -21,8 +21,8 @@ from splunklib.searchcommands.decorators import ConfigurationSetting, Option
 from splunklib.searchcommands.search_command import SearchCommand
 from splunklib.client import Service
 
-from cStringIO import StringIO
-from itertools import izip
+from splunklib.six.moves import cStringIO as StringIO
+from splunklib.six.moves import zip as izip
 from json.encoder import encode_basestring as encode_string
 from unittest import main, TestCase
 
@@ -40,7 +40,7 @@ class TestCommand(SearchCommand):
     def echo(self, records):
         for record in records:
             if record.get('action') == 'raise_exception':
-                raise StandardError(self)
+                raise Exception(self)
             yield record
 
     def _execute(self, ifile, process):
@@ -80,14 +80,14 @@ class TestCommand(SearchCommand):
 @Configuration()
 class TestStreamingCommand(StreamingCommand):
     def stream(self, records):
-        serial_number = 0L
+        serial_number = 0
         for record in records:
             action = record['action']
             if action == 'raise_error':
                 raise RuntimeError('Testing')
             value = self.search_results_info if action == 'get_search_results_info' else None
             yield {'_serial': serial_number, 'data': value}
-            serial_number += 1L
+            serial_number += 1
         return
 
 
@@ -195,8 +195,8 @@ class TestSearchCommand(TestCase):
 
         result.reset()
         reader = csv.reader(result)
-        self.assertEqual([], reader.next())
-        observed = dict(izip(reader.next(), reader.next()))
+        self.assertEqual([], next(reader))
+        observed = dict(izip(next(reader), next(reader)))
         self.assertRaises(StopIteration, reader.next)
 
         expected = {

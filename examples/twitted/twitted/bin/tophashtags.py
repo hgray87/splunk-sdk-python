@@ -14,7 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import absolute_import
 import csv, sys, urllib, re
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, os.pardir)))
+
+from splunklib import six
+from splunklib.six.moves import zip
 
 
 # Tees output to a logfile for debugging
@@ -82,7 +89,7 @@ def output_results(results, mvdelim = '\n', output = sys.stdout):
             if(isinstance(result[key], list)):
                 result['__mv_' + key] = encode_mv(result[key])
                 result[key] = mvdelim.join(result[key])
-        fields.update(result.keys())
+        fields.update(list(result.keys()))
 
     # convert the fields into a list and create a CSV writer
     # to output to stdout
@@ -91,7 +98,7 @@ def output_results(results, mvdelim = '\n', output = sys.stdout):
     writer = csv.DictWriter(output, fields)
 
     # Write out the fields, and then the actual results
-    writer.writerow(dict(zip(fields, fields)))
+    writer.writerow(dict(list(zip(fields, fields))))
     writer.writerows(results)
 
 
@@ -166,7 +173,7 @@ def main(argv):
             hashtag = hashtag_match.group(0).strip().lower()
     
             hashtag_count = 0
-            if hashtags.has_key(hashtag):
+            if hashtag in hashtags:
                 hashtag_count = hashtags[hashtag]
             
             hashtags[hashtag] = hashtag_count + 1
@@ -175,7 +182,7 @@ def main(argv):
 
     from decimal import Decimal
     results = []
-    for k, v in hashtags.iteritems():
+    for k, v in six.iteritems(hashtags):
         results.append({
             "hashtag": k, 
             "count": v, 
