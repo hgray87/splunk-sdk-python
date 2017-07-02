@@ -15,8 +15,15 @@
 # under the License.
 
 from __future__ import absolute_import
-import csv, io, sys, urllib
-from six.moves import zip
+import csv, sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)))
+
+from splunklib import six
+from splunklib.six.moves import zip
+from splunklib.six import StringIO
+from splunklib.six.moves import urllib
 
 # Tees output to a logfile for debugging
 class Logger:
@@ -52,6 +59,8 @@ class Reader:
 
     def next(self):
         return self.readline()
+
+    __next__ = next
 
     def readline(self):
         line = self.buf.readline()
@@ -123,13 +132,13 @@ def read_input(buf, has_header = True):
             # on a new line, and it belongs to the previous attribute
             if colon < 0:
                 if last_attr:
-                    header[last_attr] = header[last_attr] + '\n' + urllib.unquote(line)
+                    header[last_attr] = header[last_attr] + '\n' + urllib.parse.unquote(line)
                 else:
                     continue
 
             # extract it and set value in settings
             last_attr = attr = line[:colon]
-            val  = urllib.unquote(line[colon+1:])
+            val  = urllib.parse.unquote(line[colon+1:])
             header[attr] = val
 
     return buf, header
@@ -155,7 +164,7 @@ def main(argv):
 
     for event in events:
         # For each event, we read in the raw event data
-        raw = io.StringIO(event["_raw"])
+        raw = StringIO(event["_raw"])
         top_output = csv.DictReader(raw, delimiter = ' ', skipinitialspace = True)
     
         # And then, for each row of the output of the 'top' command

@@ -19,7 +19,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # Absolute imports
 
 from collections import namedtuple
-from splunklib import six
+
+import io
+
 try:
     from collections import OrderedDict  # must be python 2.7
 except ImportError:
@@ -275,7 +277,7 @@ class SearchCommand(object):
             path = os.path.join(dispatch_dir, 'info.csv')
 
         try:
-            with open(path, 'rb') as f:
+            with io.open(path, 'r') as f:
                 reader = csv.reader(f, dialect=CsvDialect)
                 fields = next(reader)
                 values = next(reader)
@@ -701,9 +703,10 @@ class SearchCommand(object):
                 for arg in args:
                     result = arg.split('=', 1)
                     if len(result) == 1:
-                        self.fieldnames.append(result[0])
+                        self.fieldnames.append(str(result[0]))
                     else:
                         name, value = result
+                        name = str(name)
                         try:
                             option = self.options[name]
                         except KeyError:
@@ -1009,7 +1012,8 @@ class SearchCommand(object):
             :return: String representation of this instance
 
             """
-            text = ', '.join(imap(lambda name_value: name_value[0] + '=' + json_encode_string(six.text_type(name_value[1])), six.iteritems(self)))
+            #text = ', '.join(imap(lambda (name, value): name + '=' + json_encode_string(unicode(value)), self.iteritems()))
+            text = ', '.join(['{}={}'.format(name, json_encode_string(six.text_type(value))) for (name, value) in six.iteritems(self)])
             return text
 
         # region Methods
@@ -1035,6 +1039,8 @@ class SearchCommand(object):
                 lambda name_value1: name_value1[1] is not None, imap(
                     lambda setting: (setting.name, setting.__get__(self)), ifilter(
                         lambda setting: setting.is_supported_by_protocol(version), definitions)))
+
+        items = iteritems
 
         pass  # endregion
 

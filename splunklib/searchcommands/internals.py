@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 
 from collections import deque, namedtuple
 from splunklib import six
@@ -334,11 +334,11 @@ class ConfigurationSettingsType(type):
 
 class CsvDialect(csv.Dialect):
     """ Describes the properties of Splunk CSV streams """
-    delimiter = b','
-    quotechar = b'"'
+    delimiter = ','
+    quotechar = '"'
     doublequote = True
     skipinitialspace = False
-    lineterminator = b'\r\n'
+    lineterminator = '\r\n'
     quoting = csv.QUOTE_MINIMAL
 
 
@@ -539,8 +539,7 @@ class RecordWriter(object):
 
         if fieldnames is None:
             self._fieldnames = fieldnames = list(record.keys())
-            value_list = imap(lambda fn: six.text_type(fn).encode('utf-8'), fieldnames)
-            value_list = imap(lambda fn: (fn, b'__mv_' + fn), value_list)
+            value_list = imap(lambda fn: (str(fn), str('__mv_') + str(fn)), fieldnames)
             self._writerow(list(chain.from_iterable(value_list)))
 
         get_value = record.get
@@ -563,14 +562,14 @@ class RecordWriter(object):
 
                 if len(value) > 1:
                     value_list = value
-                    sv = b''
-                    mv = b'$'
+                    sv = ''
+                    mv = '$'
 
                     for value in value_list:
 
                         if value is None:
-                            sv += b'\n'
-                            mv += b'$;$'
+                            sv += '\n'
+                            mv += '$;$'
                             continue
 
                         value_t = type(value)
@@ -580,7 +579,7 @@ class RecordWriter(object):
                             if value_t is bool:
                                 value = str(value.real)
                             elif value_t is six.text_type:
-                                value = value.encode('utf-8', errors='backslashreplace')
+                                value = value
                             elif value_t is int or value_t is int or value_t is float or value_t is complex:
                                 value = str(value)
                             elif issubclass(value_t, (dict, list, tuple)):
@@ -588,8 +587,8 @@ class RecordWriter(object):
                             else:
                                 value = repr(value).encode('utf-8', errors='backslashreplace')
 
-                        sv += value + b'\n'
-                        mv += value.replace(b'$', b'$$') + b'$;$'
+                        sv += value + '\n'
+                        mv += value.replace('$', '$$') + '$;$'
 
                     values += (sv[:-1], mv[:-2])
                     continue
@@ -606,7 +605,9 @@ class RecordWriter(object):
                 continue
 
             if value_t is six.text_type:
-                values += (value.encode('utf-8', errors='backslashreplace'), None)
+                if six.PY2:
+                    value = value.encode('utf-8')
+                values += (value, None)
                 continue
 
             if value_t is int or value_t is int or value_t is float or value_t is complex:
@@ -617,7 +618,7 @@ class RecordWriter(object):
                 values += (str(''.join(RecordWriter._iterencode_json(value, 0))), None)
                 continue
 
-            values += (repr(value).encode('utf-8', errors='backslashreplace'), None)
+            values += (repr(value), None)
 
         self._writerow(values)
         self._record_count += 1
@@ -779,7 +780,7 @@ class RecordWriterV2(RecordWriter):
         if not (metadata_length > 0 or body_length > 0):
             return
 
-        start_line = b'chunked 1.0,' + bytes(metadata_length) + b',' + bytes(body_length) + b'\n'
+        start_line = 'chunked 1.0,%s,%s\n' % (metadata_length, body_length)
         write = self._ofile.write
         write(start_line)
         write(metadata)

@@ -512,7 +512,7 @@ class Context(object):
         if self.has_cookies():
             return [("Cookie", _make_cookie_header(list(self.get_cookies().items())))]
         elif self.basic and (self.username and self.password):
-            token = 'Basic %s' % b64encode(("%s:%s" % (self.username, self.password)).encode('utf-8'))
+            token = 'Basic %s' % b64encode(("%s:%s" % (self.username, self.password)).encode('utf-8')).decode('ascii')
             return [("Authorization", token)]
         elif self.token is _NoAuthenticationToken:
             return []

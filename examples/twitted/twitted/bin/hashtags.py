@@ -15,8 +15,13 @@
 # under the License.
 
 from __future__ import absolute_import
-import csv, sys, urllib, re
-from six.moves import zip
+import csv, sys, re
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, os.pardir)))
+
+from splunklib.six.moves import zip
+from splunklib.six.moves import urllib
 
 # Tees output to a logfile for debugging
 class Logger:
@@ -53,6 +58,8 @@ class Reader:
     def next(self):
         return self.readline()
 
+    __next__ = next
+
     def readline(self):
         line = self.buf.readline()
 
@@ -77,7 +84,7 @@ def output_results(results, mvdelim = '\n', output = sys.stdout):
     # convert all multivalue keys to the right form
     fields = set()
     for result in results:    
-        for key in result.keys():
+        for key in list(result.keys()):
             if(isinstance(result[key], list)):
                 result['__mv_' + key] = encode_mv(result[key])
                 result[key] = mvdelim.join(result[key])
@@ -123,13 +130,13 @@ def read_input(buf, has_header = True):
             # on a new line, and it belongs to the previous attribute
             if colon < 0:
                 if last_attr:
-                    header[last_attr] = header[last_attr] + '\n' + urllib.unquote(line)
+                    header[last_attr] = header[last_attr] + '\n' + urllib.parse.unquote(line)
                 else:
                     continue
 
             # extract it and set value in settings
             last_attr = attr = line[:colon]
-            val  = urllib.unquote(line[colon+1:])
+            val  = urllib.parse.unquote(line[colon+1:])
             header[attr] = val
 
     return buf, header

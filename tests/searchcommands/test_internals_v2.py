@@ -26,11 +26,14 @@ try:
 except ImportError:
     from splunklib.ordereddict import OrderedDict
 from collections import namedtuple, deque
-from splunklib.six.moves import cStringIO as StringIO
+from splunklib.six.moves import StringIO as StringIO
 from functools import wraps
 from glob import iglob
-from itertools import chain, ifilter, imap, izip
-from sys import float_info, maxint as maxsize, maxunicode
+from itertools import chain
+from splunklib.six.moves import filter as ifilter
+from splunklib.six.moves import map as imap
+from splunklib.six.moves import zip as izip
+from sys import float_info, maxunicode
 from tempfile import mktemp
 from time import time
 from types import MethodType
@@ -51,8 +54,8 @@ import random
 
 # Confirmed: [minint, maxint) covers the full range of values that xrange allows
 
-minint = (-maxsize - 1) // 2
-maxint = maxsize // 2
+minint = (-six.MAXSIZE - 1) // 2
+maxint = six.MAXSIZE // 2
 
 max_length = 1 * 1024
 
@@ -85,7 +88,7 @@ def random_integer():
 
 
 def random_integers():
-    return random_list(xrange, minint, maxint)
+    return random_list(six.moves.range, minint, maxint)
 
 
 def random_list(population, *args):
@@ -93,7 +96,7 @@ def random_list(population, *args):
 
 
 def random_unicode():
-    return ''.join(imap(lambda x: unichr(x), random.sample(range(maxunicode), random.randint(0, max_length))))
+    return ''.join(imap(lambda x: six.unichr(x), random.sample(range(maxunicode), random.randint(0, max_length))))
 
 # endregion
 
@@ -187,10 +190,10 @@ class TestInternals(TestCase):
         for serial_number in range(0, 31):
             values = [serial_number, time(), random_bytes(), random_dict(), random_integers(), random_unicode()]
             record = OrderedDict(izip(fieldnames, values))
-            try:
-                write_record(record)
-            except Exception as error:
-                self.fail(error)
+            #try:
+            write_record(record)
+            #except Exception as error:
+            #    self.fail(error)
             test_data['values'].append(values)
 
         # RecordWriter accumulates inspector messages and metrics until maxresultrows are written, a partial result
@@ -366,7 +369,7 @@ class TestInternals(TestCase):
 
         return chunks
 
-    _Chunk = namedtuple('Chunk', (b'metadata', b'body'))
+    _Chunk = namedtuple('Chunk', ('metadata', 'body'))
 
     _dictionary = {
         'a': 1,

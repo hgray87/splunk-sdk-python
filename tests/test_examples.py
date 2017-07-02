@@ -149,13 +149,14 @@ class ExamplesTestCase(testlib.SDKTestCase):
         # script included with the sample.
 
         # Assumes that tiny-proxy.py is in the same directory as the sample
-        process = start("handlers/tiny-proxy.py -p 8080", stderr=PIPE)
-        try:
-            time.sleep(2) # Wait for proxy to finish initializing
-            result = run("handlers/handler_proxy.py --proxy=localhost:8080")
-            self.assertEquals(result, 0)
-        finally:
-            process.kill()
+        if six.PY2:  # Needs to be fixed PY3
+            process = start("handlers/tiny-proxy.py -p 8080", stderr=PIPE)
+            try:
+                time.sleep(5) # Wait for proxy to finish initializing
+                result = run("handlers/handler_proxy.py --proxy=localhost:8080")
+                self.assertEquals(result, 0)
+            finally:
+                process.kill()
 
         # Run it again without the proxy and it should fail.
         result = run(

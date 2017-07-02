@@ -185,7 +185,10 @@ class Integer(Validator):
         if value is None:
             return None
         try:
-            value = int(value)
+            if six.PY2:
+                value = long(value)
+            else:
+                value = int(value)
         except ValueError:
             raise ValueError('Expected integer value, not {}'.format(json_encode_string(value)))
 
