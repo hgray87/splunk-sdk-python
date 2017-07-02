@@ -14,27 +14,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from __future__ import absolute_import
 import os
 from subprocess import PIPE, Popen
 import time
 import sys
 
-import io
-
-import unittest2
-
-from tests import testlib
+import testlib 
 
 import splunklib.client as client
-from splunklib import six
 
 
 def check_multiline(testcase, first, second, message=None):
     """Assert that two multi-line strings are equal."""
-    testcase.assertTrue(isinstance(first, six.string_types), 
+    testcase.assertTrue(isinstance(first, basestring), 
         'First argument is not a string')
-    testcase.assertTrue(isinstance(second, six.string_types), 
+    testcase.assertTrue(isinstance(second, basestring), 
         'Second argument is not a string')
     # Unix-ize Windows EOL
     first = first.replace("\r", "")
@@ -74,7 +68,6 @@ class ExamplesTestCase(testlib.SDKTestCase):
         # Ignore result, it might already exist
         run("index.py create sdk-tests")
 
-    @unittest2.skipIf(six.PY3, "Async needs work to support Python 3")
     def test_async(self):
         result = run("async/async.py sync")
         self.assertEquals(result, 0)
@@ -100,7 +93,7 @@ class ExamplesTestCase(testlib.SDKTestCase):
             conf = self.service.confs['server']
             if 'SDK-STANZA' in conf:
                 conf.delete("SDK-STANZA")
-        except Exception as e:
+        except Exception, e:
             pass
 
         try:
@@ -259,9 +252,9 @@ class ExamplesTestCase(testlib.SDKTestCase):
         def test_custom_search_command(script, input_path, baseline_path):
             output_base, _ = os.path.splitext(input_path)
             output_path = output_base + ".out"
-            output_file = io.open(output_path, 'bw')
+            output_file = open(output_path, 'w')
 
-            input_file = io.open(input_path, 'br')
+            input_file = open(input_path, 'r')
 
             # Execute the command
             result = run(script, stdin=input_file, stdout=output_file)
@@ -271,11 +264,11 @@ class ExamplesTestCase(testlib.SDKTestCase):
             output_file.close()
 
             # Make sure the test output matches the baseline
-            baseline_file = io.open(baseline_path, 'br')
-            baseline = baseline_file.read().decode('utf-8')
+            baseline_file = open(baseline_path, 'r')
+            baseline = baseline_file.read()
 
-            output_file = io.open(output_path, 'br')
-            output = output_file.read().decode('utf-8')
+            output_file = open(output_path, 'r')
+            output = output_file.read()
 
             # TODO: DVPL-6700: Rewrite this test so that it is insensitive to ties in score
 
@@ -360,7 +353,7 @@ class ExamplesTestCase(testlib.SDKTestCase):
         for prop in properties:
             name = prop["name"]
             count = prop["count"]
-            self.assertTrue(name in list(expected_properties.keys()))
+            self.assertTrue(name in expected_properties.keys())
             self.assertEqual(count, expected_properties[name])
 
         # Assert property values
@@ -373,7 +366,7 @@ class ExamplesTestCase(testlib.SDKTestCase):
         for value in values:
             name = value["name"]
             count = value["count"]
-            self.assertTrue(name in list(expected_property_values.keys()))
+            self.assertTrue(name in expected_property_values.keys())
             self.assertEqual(count, expected_property_values[name])
             
         # Assert event over time

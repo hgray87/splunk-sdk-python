@@ -14,12 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from __future__ import absolute_import
-
-from io import BytesIO
-
-from splunklib.six import StringIO
-from tests import testlib
+from StringIO import StringIO
+import testlib
 from time import sleep
 import splunklib.results as results
 import io
@@ -160,7 +156,7 @@ class ResultsTestCase(testlib.SDKTestCase):
         self.assert_parsed_results_equals(xml_text, expected_results)
 
     def assert_parsed_results_equals(self, xml_text, expected_results):
-        results_reader = results.ResultsReader(BytesIO(xml_text.encode('utf-8')))
+        results_reader = results.ResultsReader(StringIO(xml_text))
         actual_results = [x for x in results_reader]
         self.assertEquals(expected_results, actual_results)
 

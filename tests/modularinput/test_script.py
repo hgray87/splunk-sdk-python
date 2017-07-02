@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from __future__ import absolute_import
 from tests.modularinput.modularinput_testlib import unittest, xml_compare, data_open
 from splunklib.client import Service
 from splunklib.modularinput.argument import Argument
@@ -22,11 +21,9 @@ from splunklib.modularinput.script import Script
 from splunklib.modularinput.scheme import Scheme
 
 try:
-    from splunklib.six.moves import cStringIO as StringIO
+    from cStringIO import StringIO
 except ImportError:
-    from splunklib.six import StringIO
-
-from io import BytesIO
+    from StringIO import StringIO
 
 try:
     import xml.etree.cElementTree as ET
@@ -52,8 +49,8 @@ class ScriptTest(unittest.TestCase):
         
         script = NewScript()
 
-        out = BytesIO()
-        err = BytesIO()
+        out = StringIO()
+        err = StringIO()
         ew = EventWriter(out, err)
 
         in_stream = StringIO()
@@ -61,8 +58,8 @@ class ScriptTest(unittest.TestCase):
         args = [TEST_SCRIPT_PATH, "--scheme"]
         return_value = script.run_script(args, ew, in_stream)
 
-        self.assertEqual(b"", out.getvalue())
-        self.assertEqual(b"FATAL Modular input script returned a null scheme.\n", err.getvalue())
+        self.assertEqual("", out.getvalue())
+        self.assertEqual("FATAL Modular input script returned a null scheme.\n", err.getvalue())
         self.assertNotEqual(0, return_value)
 
     def test_scheme_properly_generated_by_script(self):
@@ -96,14 +93,14 @@ class ScriptTest(unittest.TestCase):
 
         script = NewScript()
 
-        out = BytesIO()
-        err = BytesIO()
+        out = StringIO()
+        err = StringIO()
         ew = EventWriter(out, err)
 
         args = [TEST_SCRIPT_PATH, "--scheme"]
         return_value = script.run_script(args, ew, err)
 
-        self.assertEqual(b"", err.getvalue())
+        self.assertEqual("", err.getvalue())
         self.assertEqual(0, return_value)
 
         found = ET.fromstring(out.getvalue())
@@ -158,8 +155,8 @@ class ScriptTest(unittest.TestCase):
 
         script = NewScript()
 
-        out = BytesIO()
-        err = BytesIO()
+        out = StringIO()
+        err = StringIO()
         ew = EventWriter(out, err)
 
         args = [TEST_SCRIPT_PATH, "--validate-arguments"]
@@ -167,9 +164,9 @@ class ScriptTest(unittest.TestCase):
         return_value = script.run_script(args, ew, data_open("data/validation.xml"))
 
         expected = ET.parse(data_open("data/validation_error.xml")).getroot()
-        found = ET.fromstring(out.getvalue().decode('utf-8'))
+        found = ET.fromstring(out.getvalue())
 
-        self.assertEqual(b"", err.getvalue())
+        self.assertEqual("", err.getvalue())
         self.assertTrue(xml_compare(expected, found))
         self.assertNotEqual(0, return_value)
 
@@ -200,14 +197,14 @@ class ScriptTest(unittest.TestCase):
         script = NewScript()
         input_configuration = data_open("data/conf_with_2_inputs.xml")
 
-        out = BytesIO()
-        err = BytesIO()
+        out = StringIO()
+        err = StringIO()
         ew = EventWriter(out, err)
 
         return_value = script.run_script([TEST_SCRIPT_PATH], ew, input_configuration)
 
         self.assertEqual(0, return_value)
-        self.assertEqual(b"", err.getvalue())
+        self.assertEqual("", err.getvalue())
 
         expected = ET.parse(data_open("data/stream_with_two_events.xml")).getroot()
         found = ET.fromstring(out.getvalue())
@@ -237,8 +234,8 @@ class ScriptTest(unittest.TestCase):
         script = NewScript(self)
         input_configuration = data_open("data/conf_with_2_inputs.xml")
 
-        out = BytesIO()
-        err = BytesIO()
+        out = StringIO()
+        err = StringIO()
         ew = EventWriter(out, err)
 
         self.assertEqual(script.service, None)
@@ -247,7 +244,7 @@ class ScriptTest(unittest.TestCase):
             [TEST_SCRIPT_PATH], ew, input_configuration)
 
         self.assertEqual(0, return_value)
-        self.assertEqual(b"", err.getvalue())
+        self.assertEqual("", err.getvalue())
 
         return
 

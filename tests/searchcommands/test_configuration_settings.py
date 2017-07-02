@@ -28,7 +28,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from splunklib.searchcommands.decorators import Configuration
 from unittest import main, TestCase
-from splunklib import six
 
 
 class TestConfigurationSettings(TestCase):
@@ -46,7 +45,7 @@ class TestConfigurationSettings(TestCase):
         command._protocol_version = 1
 
         self.assertTrue(
-            [(name, value) for name, value in six.iteritems(command.configuration)],
+            [(name, value) for name, value in command.configuration.iteritems()],
             [('generating', True)])
 
         self.assertIs(command.configuration.generates_timeorder, None)
@@ -69,7 +68,7 @@ class TestConfigurationSettings(TestCase):
             self.fail('Expected AttributeError')
 
         self.assertEqual(
-            [(name, value) for name, value in six.iteritems(command.configuration)],
+            [(name, value) for name, value in command.configuration.iteritems()],
             [('generates_timeorder', True), ('generating', True), ('local', True), ('retainsevents', True),
              ('streaming', True)])
 
@@ -77,7 +76,7 @@ class TestConfigurationSettings(TestCase):
         command._protocol_version = 2
 
         self.assertEqual(
-            [(name, value) for name, value in six.iteritems(command.configuration)],
+            [(name, value) for name, value in command.configuration.iteritems()],
             [('generating', True), ('type', 'streaming')])
 
         self.assertIs(command.configuration.distributed, False)
@@ -96,7 +95,7 @@ class TestConfigurationSettings(TestCase):
             self.fail('Expected AttributeError')
 
         self.assertEqual(
-            [(name, value) for name, value in six.iteritems(command.configuration)],
+            [(name, value) for name, value in command.configuration.iteritems()],
             [('generating', True), ('type', 'stateful')])
 
         return
@@ -115,7 +114,7 @@ class TestConfigurationSettings(TestCase):
         command._protocol_version = 1
 
         self.assertEqual(
-            [(name, value) for name, value in six.iteritems(command.configuration)],
+            [(name, value) for name, value in command.configuration.iteritems()],
             [('streaming', True)])
 
         self.assertIs(command.configuration.clear_required_fields, None)
@@ -139,14 +138,14 @@ class TestConfigurationSettings(TestCase):
             self.fail('Expected AttributeError')
 
         self.assertEqual(
-            [(name, value) for name, value in six.iteritems(command.configuration)],
+            [(name, value) for name, value in command.configuration.iteritems()],
             [('clear_required_fields', True), ('local', True), ('overrides_timeorder', True), ('required_fields', ['field_1', 'field_2', 'field_3']), ('streaming', True)])
 
         command = TestCommand()
         command._protocol_version = 2
 
         self.assertEqual(
-            [(name, value) for name, value in six.iteritems(command.configuration)],
+            [(name, value) for name, value in command.configuration.iteritems()],
             [('type', 'stateful')])
 
         self.assertIs(command.configuration.distributed, True)
@@ -165,7 +164,7 @@ class TestConfigurationSettings(TestCase):
             self.fail('Expected AttributeError')
 
         self.assertEqual(
-            [(name, value) for name, value in six.iteritems(command.configuration)],
+            [(name, value) for name, value in command.configuration.iteritems()],
             [('required_fields', ['field_1', 'field_2', 'field_3']), ('type', 'streaming')])
 
         return

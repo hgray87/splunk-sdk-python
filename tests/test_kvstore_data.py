@@ -14,10 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from __future__ import absolute_import
 import json
-from tests import testlib
-from splunklib.six.moves import range
+import testlib
 try:
     import unittest
 except ImportError:
